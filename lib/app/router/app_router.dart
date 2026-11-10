@@ -1,0 +1,309 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:saydaliati/app/router/app_routes.dart';
+import 'package:saydaliati/app/shell/desktop_shell.dart';
+import 'package:saydaliati/core/permissions/permission_codes.dart';
+import 'package:saydaliati/core/permissions/permission_providers.dart';
+import 'package:saydaliati/core/session/session_controller.dart';
+import 'package:saydaliati/core/session/session_state.dart';
+import 'package:saydaliati/features/about/presentation/pages/about_page.dart';
+import 'package:saydaliati/features/accounts/presentation/pages/accounts_page.dart';
+import 'package:saydaliati/features/auth/presentation/pages/account_page.dart';
+import 'package:saydaliati/features/auth/presentation/pages/login_page.dart';
+import 'package:saydaliati/features/auth/presentation/pages/register_page.dart';
+import 'package:saydaliati/features/catalog/presentation/pages/catalog_page.dart';
+import 'package:saydaliati/features/categories/presentation/pages/categories_page.dart';
+import 'package:saydaliati/features/currencies/presentation/pages/currencies_page.dart';
+import 'package:saydaliati/features/customers/presentation/pages/customers_page.dart';
+import 'package:saydaliati/features/debts/presentation/pages/debts_page.dart';
+import 'package:saydaliati/features/expenses/presentation/pages/expense_categories_page.dart';
+import 'package:saydaliati/features/expenses/presentation/pages/expenses_list_page.dart';
+import 'package:saydaliati/features/home/presentation/pages/home_page.dart';
+import 'package:saydaliati/features/intro/intro_providers.dart';
+import 'package:saydaliati/features/intro/presentation/intro_page.dart';
+import 'package:saydaliati/features/manufacturers/presentation/pages/manufacturers_page.dart';
+import 'package:saydaliati/features/medicine_units/presentation/pages/units_page.dart';
+import 'package:saydaliati/features/medicines/presentation/pages/medicines_page.dart';
+import 'package:saydaliati/features/notifications/presentation/pages/notifications_page.dart';
+import 'package:saydaliati/features/purchases/presentation/pages/opening_balance_invoices_page.dart';
+import 'package:saydaliati/features/purchases/presentation/pages/purchase_create_page.dart';
+import 'package:saydaliati/features/purchases/presentation/pages/purchase_returns_list_page.dart';
+import 'package:saydaliati/features/purchases/presentation/pages/purchases_list_page.dart';
+import 'package:saydaliati/features/reports/domain/report_period.dart';
+import 'package:saydaliati/features/reports/presentation/pages/expiry_report_page.dart';
+import 'package:saydaliati/features/reports/presentation/pages/inventory_report_page.dart';
+import 'package:saydaliati/features/reports/presentation/pages/prescriptions_report_page.dart';
+import 'package:saydaliati/features/reports/presentation/pages/profit_report_page.dart';
+import 'package:saydaliati/features/reports/presentation/pages/purchases_report_page.dart';
+import 'package:saydaliati/features/reports/presentation/pages/sales_report_page.dart';
+import 'package:saydaliati/features/reports/presentation/pages/stocktake_report_page.dart';
+import 'package:saydaliati/features/roles/presentation/pages/roles_page.dart';
+import 'package:saydaliati/features/sales/presentation/pages/sale_returns_list_page.dart';
+import 'package:saydaliati/features/sales/presentation/pages/sales_list_page.dart';
+import 'package:saydaliati/features/sales/presentation/pages/sales_page.dart';
+import 'package:saydaliati/features/settings/presentation/pages/settings_page.dart';
+import 'package:saydaliati/features/shortcuts/presentation/pages/shortcuts_page.dart';
+import 'package:saydaliati/features/splash/splash_page.dart';
+import 'package:saydaliati/features/stock/presentation/pages/stock_page.dart';
+import 'package:saydaliati/features/stock_movements/presentation/pages/stock_movements_page.dart';
+import 'package:saydaliati/features/suppliers/presentation/pages/suppliers_page.dart';
+import 'package:saydaliati/features/tutorials/presentation/tutorials_page.dart';
+import 'package:saydaliati/features/users/presentation/pages/users_page.dart';
+import 'package:saydaliati/features/vouchers/presentation/pages/vouchers_list_page.dart';
+
+part 'app_router.g.dart';
+
+final _rootKey = GlobalKey<NavigatorState>();
+
+/// Route → required permission, checked in the redirect below (the sidebar
+/// already hides these entries; this is the second line of defense).
+const _routePermissions = <String, String>{
+  AppRoutes.users: PermissionCodes.usersView,
+  AppRoutes.roles: PermissionCodes.rolesView,
+};
+
+/// The app's [GoRouter] — desktop edition.
+///
+/// All sections that were previously pushed on the root navigator ("More"
+/// sub-pages) are now [StatefulShellBranch]es so the sidebar remains visible
+/// while every part of the app is open.
+///
+/// Branch index → route map (must stay in sync with desktop_sidebar.dart):
+///   0  /sales                 – POS / Sales
+///   1  /products              – Medicines
+///   2  /catalog               – Catalog
+///   3  /home                  – Dashboard / quick actions
+///   4  /more/inventory        – Stock
+///   5  /more/stock-movements  – Stock movements
+///   6  /more/purchases        – Purchases
+///   7  /more/returns          – Sales/purchases returns (sibling routes)
+///   8  /more/suppliers        – Suppliers
+///   9  /more/customers        – Customers
+///  10  /more/categories       – Categories
+///  11  /more/manufacturers    – Manufacturers
+///  12  /more/units            – Units
+///  13  /more/currencies       – Currencies
+///  14  /more/reports          – Reports hub
+///  15  /more/expenses         – Expense categories/log (sibling routes)
+///  16  /more/accounts         – Chart of accounts
+///  17  /more/notifications    – Notifications
+///  18  /more/tutorials        – Tutorials
+///  19  /more/settings         – Settings
+///  20  /more/profile          – Account / profile
+///  25  /more/users            – Staff users (Admin only)
+///  26  /more/roles            – Roles & permissions (Admin only)
+@Riverpod(keepAlive: true)
+GoRouter goRouter(Ref ref) {
+  GoRoute rootRoute(String path, Widget Function(GoRouterState) build) =>
+      GoRoute(
+        path: path,
+        parentNavigatorKey: _rootKey,
+        builder: (context, state) => build(state),
+      );
+
+  StatefulShellBranch branch(String path, Widget page) =>
+      StatefulShellBranch(
+        routes: [GoRoute(path: path, builder: (c, s) => page)],
+      );
+
+  final refresh = ValueNotifier<int>(0);
+  ref.listen(sessionControllerProvider, (_, _) => refresh.value++);
+  ref.listen(introSeenProvider, (_, _) => refresh.value++);
+  // Permissions resolve asynchronously (right after login, via /auth/me) — a
+  // route that was blocked at first render must re-evaluate once they land.
+  ref.listen(currentUserPermissionsProvider, (_, _) => refresh.value++);
+  ref.onDispose(refresh.dispose);
+
+  return GoRouter(
+    navigatorKey: _rootKey,
+    initialLocation: AppRoutes.splash,
+    refreshListenable: refresh,
+    redirect: (context, state) {
+      final session = ref.read(sessionControllerProvider);
+      final introSeen = ref.read(introSeenProvider);
+      final loc = state.matchedLocation;
+      final onSplash = loc == AppRoutes.splash;
+
+      if (session.isLoading || introSeen.isLoading) {
+        return onSplash ? null : AppRoutes.splash;
+      }
+
+      final authed = session.asData?.value is Authenticated;
+      final seenIntro = introSeen.asData?.value ?? true;
+      final onIntro = loc == AppRoutes.intro;
+      final onAuth = loc == AppRoutes.login || loc == AppRoutes.register;
+
+      if (authed) {
+        // الرئيسية (الداشبورد، عنوانها "التقارير") هي الصفحة الافتراضية عند
+        // فتح التطبيق — لا المبيعات.
+        if (onAuth || onIntro || onSplash) return AppRoutes.home;
+        // Defense-in-depth below the sidebar filtering: a direct/typed URL
+        // or a restored tab must not reach a page the current role can't see.
+        final requiredPermission = _routePermissions[loc];
+        if (requiredPermission != null) {
+          final perms = ref.read(currentUserPermissionsProvider);
+          if (!perms.has(requiredPermission)) return AppRoutes.home;
+        }
+        return null;
+      }
+      if (!seenIntro) return onIntro ? null : AppRoutes.intro;
+      if (onSplash || onIntro) return AppRoutes.login;
+      return onAuth ? null : AppRoutes.login;
+    },
+    routes: [
+      // ── Auth / onboarding ──────────────────────────────────────────────
+      rootRoute(AppRoutes.splash, (s) => const SplashPage()),
+      rootRoute(AppRoutes.intro, (s) => const IntroPage()),
+      rootRoute(AppRoutes.login, (s) => const LoginPage()),
+      rootRoute(AppRoutes.register, (s) => const RegisterPage()),
+      rootRoute(AppRoutes.about, (s) => const AboutPage()),
+
+      // ── Desktop shell with sidebar ─────────────────────────────────────
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, shell) => DesktopShell(shell: shell),
+        branches: [
+          // ── Main tabs (indices 0-3) ────────────────────────────────────
+          branch(AppRoutes.sales, const SalesPage()),
+          branch(AppRoutes.products, const MedicinesPage()),
+          branch(AppRoutes.catalog, const CatalogPage()),
+          branch(AppRoutes.home, const HomePage()),
+
+          // ── Inventory & purchasing (indices 4-6) ──────────────────────
+          branch(AppRoutes.inventory, const StockPage()),
+          branch(AppRoutes.stockMovements, const StockMovementsPage()),
+          branch(AppRoutes.purchases, const PurchaseCreatePage()),
+
+          // ── Returns (index 7) ───────────────────────────────────────────
+          // مسارات شقيقة (نفس أسلوب التقارير): `go` بينها يستبدل الصفحة بلا
+          // مكدس، والشريط الجانبي يظلّل القسم المفتوح.
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.salesReturns,
+                builder: (c, s) => const SaleReturnsListPage(),
+              ),
+              GoRoute(
+                path: AppRoutes.purchaseReturns,
+                builder: (c, s) => const PurchaseReturnsListPage(),
+              ),
+            ],
+          ),
+
+          // ── Master data (indices 8-13) ─────────────────────────────────
+          branch(AppRoutes.suppliers, const SuppliersPage()),
+          branch(AppRoutes.customers, const CustomersPage()),
+          branch(AppRoutes.categories, const CategoriesPage()),
+          branch(AppRoutes.manufacturers, const ManufacturersPage()),
+          branch(AppRoutes.units, const UnitsPage()),
+          branch(AppRoutes.currencies, const CurrenciesPage()),
+
+          // ── Reports (index 13) ─────────────────────────────────────────
+          // مسارات شقيقة (لا تداخل ولا صفحة مركز): `go` بينها يستبدل الصفحة
+          // فلا مكدس ولا سهم رجوع، والشريط الجانبي يظلّل التقرير المفتوح.
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.salesReport,
+                builder: (c, s) =>
+                    SalesReportPage(initialPeriod: ReportPeriod.month()),
+              ),
+              GoRoute(
+                path: AppRoutes.profitReport,
+                builder: (c, s) =>
+                    ProfitReportPage(initialPeriod: ReportPeriod.month()),
+              ),
+              GoRoute(
+                path: AppRoutes.purchasesReport,
+                builder: (c, s) =>
+                    PurchasesReportPage(initialPeriod: ReportPeriod.month()),
+              ),
+              GoRoute(
+                path: AppRoutes.inventoryReport,
+                builder: (c, s) => const InventoryReportPage(),
+              ),
+              GoRoute(
+                path: AppRoutes.expiryReport,
+                builder: (c, s) => const ExpiryReportPage(),
+              ),
+              GoRoute(
+                path: AppRoutes.stocktakeReport,
+                builder: (c, s) => const StocktakeReportPage(),
+              ),
+              GoRoute(
+                path: AppRoutes.prescriptionsReport,
+                builder: (c, s) => const PrescriptionsReportPage(),
+              ),
+            ],
+          ),
+
+          // ── Expenses (index 15) ─────────────────────────────────────────
+          // مسارات شقيقة (نفس أسلوب المرتجعات/التقارير): `go` بينها يستبدل
+          // الصفحة بلا مكدس، والشريط الجانبي يظلّل القسم المفتوح.
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.expenseCategories,
+                builder: (c, s) => const ExpenseCategoriesPage(),
+              ),
+              GoRoute(
+                path: AppRoutes.expenses,
+                builder: (c, s) => const ExpensesListPage(),
+              ),
+            ],
+          ),
+
+          // ── Accounts + Vouchers (index 16) ──────────────────────────────
+          // مسارات شقيقة (نفس أسلوب المصاريف/المرتجعات): `go` بينها يستبدل
+          // الصفحة بلا مكدس، والشريط الجانبي يظلّل القسم المفتوح.
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.accounts,
+                builder: (c, s) => const AccountsPage(),
+              ),
+              GoRoute(
+                path: AppRoutes.vouchers,
+                builder: (c, s) => const VouchersListPage(),
+              ),
+            ],
+          ),
+
+          // ── System (indices 17-21) ─────────────────────────────────────
+          branch(AppRoutes.notifications, const NotificationsPage()),
+          branch(AppRoutes.tutorials, const TutorialsPage()),
+          branch(AppRoutes.settings, const SettingsPage()),
+          branch(AppRoutes.profile, const AccountPage()),
+          // يُضاف في النهاية عمداً: رقم الفرع هو ما يعتمده الشريط الجانبي،
+          // فالإدراج في المنتصف يزيح أرقام ما بعده.
+          branch(AppRoutes.shortcuts, const ShortcutsPage()),
+          branch(AppRoutes.salesInvoices, const SalesListPage()),
+          branch(AppRoutes.purchaseInvoices, const PurchasesListPage()),
+          // ── الذمم (index 24) ───────────────────────────────────────────
+          // مسارات شقيقة داخل فرع واحد: `go` بينها يستبدل الصفحة بلا مكدس،
+          // والشريط الجانبي يظلّل المفتوح بمطابقة المسار لا رقم الفرع.
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.debtsCustomers,
+                builder: (c, s) => const CustomerDebtsPage(),
+              ),
+              GoRoute(
+                path: AppRoutes.debtsSuppliers,
+                builder: (c, s) => const SupplierDebtsPage(),
+              ),
+            ],
+          ),
+          // ── Staff management (indices 25-26) ──────────────────────────
+          // تُضاف في النهاية عمداً (نفس سبب shortcuts/salesInvoices أعلاه).
+          branch(AppRoutes.users, const UsersPage()),
+          branch(AppRoutes.roles, const RolesPage()),
+          // ── Opening balance invoices (index 27) ─────────────────────────
+          // تُضاف في النهاية عمداً (نفس سبب shortcuts/salesInvoices أعلاه).
+          branch(AppRoutes.openingBalanceInvoices,
+              const OpeningBalanceInvoicesPage()),
+        ],
+      ),
+    ],
+  );
+}

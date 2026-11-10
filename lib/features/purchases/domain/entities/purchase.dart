@@ -1,0 +1,38 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'purchase.freezed.dart';
+
+/// A purchase invoice (read side).
+@freezed
+abstract class Purchase with _$Purchase {
+  const factory Purchase({
+    required String id,
+    required DateTime purchaseDate,
+    @Default('') String supplierName,
+    required double totalAmount,
+    @Default(0) int invoiceNumber,
+    @Default('') String paymentAccountId,
+    @Default(<PurchaseLine>[]) List<PurchaseLine> items,
+
+    /// فاتورة أول المدة — مخزون افتتاحي بلا مورّد، مقيَّدة مقابل رأس المال.
+    @Default(false) bool isOpeningBalance,
+  }) = _Purchase;
+}
+
+@freezed
+abstract class PurchaseLine with _$PurchaseLine {
+  const factory PurchaseLine({
+    required String medicineName,
+    required String unitName,
+    required double unitPrice,
+    required double quantity,
+
+    /// كمية البونص المُستلَمة مجّاناً — بلا ثمن وبكلفة صفر، فبيعها ربح صافٍ.
+    @Default(0) double bonusQuantity,
+
+    required double subTotal,
+    @Default('') String medicineId,
+    @Default('') String unitId,
+    DateTime? expiryDate,
+  }) = _PurchaseLine;
+}

@@ -1,0 +1,430 @@
+﻿import 'package:flutter/material.dart';
+import 'package:saydaliati/core/theme/app_semantic_colors.dart';
+import 'package:saydaliati/core/theme/app_spacing.dart';
+import 'package:saydaliati/shared/utils/formatters.dart';
+import 'package:trina_grid/trina_grid.dart';
+
+/// الغريد الحقيقي الموحّد للمشروع — TrinaGrid (خليفة PlutoGrid المصان) مهيّأ
+/// على ثيم التطبيق: أعمدة بفواصل، صف فلترة «يحتوي» تحت كل رأس، أسطر مفصولة،
+/// صفوف مخططة، فرز وسحب للأعمدة، ودعم شجرة (فاتورة ← بنودها).
+///
+/// استخدم هذا الغلاف في كل الشاشات بدل استدعاء TrinaGrid مباشرة حتى يبقى
+/// المظهر موحّداً ويُعدَّل من مكان واحد.
+TrinaGridConfiguration appGridConfiguration(BuildContext context) {
+  final theme = Theme.of(context);
+  final scheme = theme.colorScheme;
+  final border = context.semantic.border;
+  return TrinaGridConfiguration(
+    // تمدد تلقائي: الأعمدة تتوزّع على كامل عرض الشبكة بنسبة عرضها المحدد،
+    // وتعديل عرض عمود يدوياً يدفع/يسحب جيرانه فيبقى الجدول مالئاً للشاشة.
+    columnSize: const TrinaGridColumnSizeConfig(
+      autoSizeMode: TrinaAutoSizeMode.scale,
+      resizeMode: TrinaResizeMode.pushAndPull,
+    ),
+    style: TrinaGridStyleConfig(
+      gridBackgroundColor: scheme.surface,
+      rowColor: scheme.surface,
+      // صفوف مخططة — قراءة أسهل للجداول الطويلة.
+      oddRowColor: scheme.surfaceContainerHighest.withValues(alpha: 0.25),
+      activatedColor: scheme.primary.withValues(alpha: 0.08),
+      activatedBorderColor: scheme.primary,
+      inactivatedBorderColor: Colors.transparent,
+      cellColorInReadOnlyState: Colors.transparent,
+      // أثناء التحرير تبقى الخلية بمظهرها (خلفية السطح نفسها مع إطار التفعيل
+      // الأخضر) بدل حقل أبيض غريب يغطي تصميم الخلية.
+      cellColorInEditState: scheme.surface,
+      cellActiveColor: scheme.primary.withValues(alpha: 0.08),
+      gridBorderColor: border,
+      borderColor: border,
+      iconColor: scheme.primary,
+      menuBackgroundColor: scheme.surface,
+      columnTextStyle: theme.textTheme.bodySmall!.copyWith(
+        fontWeight: FontWeight.w700,
+        color: scheme.onSurfaceVariant,
+      ),
+      cellTextStyle: theme.textTheme.bodyMedium!,
+      columnHeight: 38,
+      rowHeight: 36,
+      columnFilterHeight: 36,
+      defaultColumnFilterPadding: const EdgeInsets.all(4),
+      enableColumnBorderVertical: true,
+      enableColumnBorderHorizontal: true,
+      enableCellBorderVertical: true,
+      enableCellBorderHorizontal: true,
+      gridBorderRadius: BorderRadius.circular(8),
+      gridPopupBorderRadius: BorderRadius.circular(8),
+    ),
+    localeText: const TrinaGridLocaleText.arabic(),
+  );
+}
+
+/// قائمة العمود المخصّصة: تضيف «ترتيب تصاعدي/تنازلي» فوق عناصر القائمة
+/// الافتراضية (تجميد للبداية/النهاية، ملاءمة، إخفاء، تعيين الأعمدة، الفلترة).
+class _AppColumnMenuDelegate implements TrinaColumnMenuDelegate<dynamic> {
+  const _AppColumnMenuDelegate();
+
+  static const _sortAsc = 'app_sortAsc';
+  static const _sortDesc = 'app_sortDesc';
+  static const _default = TrinaColumnMenuDelegateDefault();
+
+  @override
+  List<PopupMenuEntry<dynamic>> buildMenuItems({
+    required TrinaGridStateManager stateManager,
+    required TrinaColumn column,
+  }) {
+    return [
+      if (column.enableSorting) ...[
+        const PopupMenuItem<dynamic>(
+          value: _sortAsc,
+          height: 36,
+          child: Row(
+            children: [
+              Icon(Icons.arrow_upward, size: 15),
+              SizedBox(width: 8),
+              Text('ترتيب تصاعدي', style: TextStyle(fontSize: 13)),
+            ],
+          ),
+        ),
+        const PopupMenuItem<dynamic>(
+          value: _sortDesc,
+          height: 36,
+          child: Row(
+            children: [
+              Icon(Icons.arrow_downward, size: 15),
+              SizedBox(width: 8),
+              Text('ترتيب تنازلي', style: TextStyle(fontSize: 13)),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(),
+      ],
+      ..._default.buildMenuItems(stateManager: stateManager, column: column),
+    ];
+  }
+
+  @override
+  void onSelected({
+    required BuildContext context,
+    required TrinaGridStateManager stateManager,
+    required TrinaColumn column,
+    required bool mounted,
+    required dynamic selected,
+  }) {
+    switch (selected) {
+      case _sortAsc:
+        stateManager.sortAscending(column);
+      case _sortDesc:
+        stateManager.sortDescending(column);
+      default:
+        _default.onSelected(
+          context: context,
+          stateManager: stateManager,
+          column: column,
+          mounted: mounted,
+          selected: selected,
+        );
+    }
+  }
+}
+
+class AppGrid extends StatefulWidget {
+  const AppGrid({
+    required this.columns,
+    required this.rows,
+    this.onLoaded,
+    this.rowColorCallback,
+    this.onRowDoubleTap,
+    this.onChanged,
+    this.showColumnFilter = false,
+    this.searchable = true,
+    this.searchHint,
+    this.tree = false,
+    super.key,
+  });
+
+  /// تغيّرت قيمة خلية قابلة للتعديل (بعد الخروج منها/Enter).
+  final void Function(TrinaGridOnChangedEvent event)? onChanged;
+
+  final List<TrinaColumn> columns;
+  final List<TrinaRow<dynamic>> rows;
+
+  /// نقرة مزدوجة على صف (فتح التفاصيل…).
+  final TrinaOnRowDoubleTapEventCallback? onRowDoubleTap;
+
+  /// يُستدعى بعد تهيئة الشبكة (للاحتفاظ بالـ state manager مثلاً).
+  final void Function(TrinaGridStateManager manager)? onLoaded;
+
+  /// تلوين صف حسب حالته (بيع بخسارة…) — يسبق التخطيط.
+  final TrinaRowColorCallback? rowColorCallback;
+
+  /// صفّ الفلترة «يحتوي» تحت رؤوس الأعمدة — **مُطفأ افتراضياً**.
+  ///
+  /// كان يشغل سطراً كاملاً من كل جدول بمربّع بحثٍ لكل عمود: مساحةٌ كبيرة
+  /// مقابل أداةٍ تُلزم المستخدم أن يعرف **في أيّ عمود** يقع ما يبحث عنه قبل
+  /// أن يكتبه. وحقل البحث العامّ أدناه يغني عنه: كلمةٌ واحدة تُطابَق على كل
+  /// الأعمدة الظاهرة.
+  final bool showColumnFilter;
+
+  /// حقل بحثٍ عامّ فوق الجدول يُصفّي على كل الأعمدة.
+  final bool searchable;
+
+  /// نصّ إرشاديّ للبحث — يصف محتوى الجدول («ابحث في الأدوية…»).
+  final String? searchHint;
+
+  /// شجرة: صفوف `TrinaRowType.group` تتوسّع لأبنائها بأيقونة على أول عمود.
+  final bool tree;
+
+  @override
+  State<AppGrid> createState() => _AppGridState();
+}
+
+class _AppGridState extends State<AppGrid> {
+  final _search = TextEditingController();
+  TrinaGridStateManager? _manager;
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  /// يُطابق الكلمة على **قيم كل الأعمدة الظاهرة** لا على عمودٍ بعينه.
+  ///
+  /// والمقارنة على النصّ المعروض لا على القيمة الخام: المستخدم يبحث عمّا
+  /// يراه. وصفوف المجموعات في الشجرة تبقى ظاهرة إن طابق أحد أبنائها، وإلّا
+  /// اختفت الشجرة كلّها عند أوّل حرف.
+  void _applySearch(String raw) {
+    final m = _manager;
+    if (m == null) return;
+    final term = raw.trim().toLowerCase();
+
+    if (term.isEmpty) {
+      m.setFilter(null);
+      return;
+    }
+
+    final fields = [
+      for (final c in widget.columns)
+        if (!c.hide) c.field,
+    ];
+
+    bool matches(TrinaRow<dynamic> row) {
+      for (final f in fields) {
+        final v = row.cells[f]?.value;
+        if (v == null) continue;
+        if (v.toString().toLowerCase().contains(term)) return true;
+      }
+      // صفّ مجموعة: يكفي أن يطابق أحد أبنائه.
+      final group = row.type.isGroup ? row.type.group.children : null;
+      if (group != null) {
+        for (final child in group) {
+          if (matches(child)) return true;
+        }
+      }
+      return false;
+    }
+
+    m.setFilter(matches);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final grid = _buildGrid(context);
+    if (!widget.searchable) return grid;
+
+    return Column(
+      children: [
+        _SearchBar(
+          controller: _search,
+          hint: widget.searchHint,
+          onChanged: _applySearch,
+        ),
+        Expanded(child: grid),
+      ],
+    );
+  }
+
+  Widget _buildGrid(BuildContext context) {
+    // خلايا التحرير داخل الغريد تستخدم TextField عادي (بلا Decoration خاصة من
+    // الحزمة)، فيرث شكل حقول الإدخال العام للتطبيق (خلفية مملوءة وحواف دائرية
+    // بيضوية بدل خط مستقيم رفيع) فيبرز كخلية غريبة وسط الجدول. نلغي هذا
+    // الوراثة هنا فقط (الثيم العام للتطبيق يبقى كما هو خارج الغريد) حتى تبقى
+    // كل خلايا كل الغريدات بنفس التنسيق المسطّح الموحّد.
+    final theme = Theme.of(context);
+    return Theme(
+      data: theme.copyWith(
+        inputDecorationTheme: const InputDecorationTheme(
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          disabledBorder: InputBorder.none,
+          filled: false,
+          isDense: true,
+          contentPadding: EdgeInsets.zero,
+        ),
+      ),
+      child: TrinaGrid(
+        columns: widget.columns,
+        rows: widget.rows,
+        configuration: appGridConfiguration(context),
+        columnMenuDelegate: const _AppColumnMenuDelegate(),
+        rowColorCallback: widget.rowColorCallback,
+        onRowDoubleTap: widget.onRowDoubleTap,
+        onChanged: widget.onChanged,
+        onLoaded: (TrinaGridOnLoadedEvent event) {
+          final m = event.stateManager;
+          _manager = m;
+          m.setShowColumnFilter(widget.showColumnFilter);
+          // نقرةٌ واحدة تفتح الخلية للتحرير بدل نقرتين أو Enter. الأعمدة
+          // المقروءة فقط (`enableEditingMode: false`) لا يمسّها هذا.
+          m.setAutoEditing(true);
+          if (widget.tree) {
+            m.setRowGroup(
+              TrinaRowGroupTreeDelegate(
+                resolveColumnDepth: (column) => m.columnIndex(column),
+                showText: (cell) => true,
+                showFirstExpandableIcon: true,
+              ),
+            );
+          }
+          widget.onLoaded?.call(m);
+        },
+      ),
+    );
+  }
+}
+
+/// شريط البحث العامّ فوق الجدول.
+class _SearchBar extends StatelessWidget {
+  const _SearchBar({
+    required this.controller,
+    required this.onChanged,
+    this.hint,
+  });
+
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+  final String? hint;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: SizedBox(
+        height: 36,
+        child: TextField(
+          controller: controller,
+          onChanged: onChanged,
+          textAlignVertical: TextAlignVertical.center,
+          style: theme.textTheme.bodyMedium,
+          decoration: InputDecoration(
+            isDense: true,
+            hintText: hint ?? 'بحث…',
+            prefixIcon: const Icon(Icons.search, size: 18),
+            prefixIconConstraints:
+                const BoxConstraints(minWidth: 34, minHeight: 34),
+            suffixIcon: ValueListenableBuilder<TextEditingValue>(
+              valueListenable: controller,
+              builder: (context, value, _) => value.text.isEmpty
+                  ? const SizedBox.shrink()
+                  : IconButton(
+                      icon: const Icon(Icons.close, size: 16),
+                      tooltip: 'مسح البحث',
+                      onPressed: () {
+                        controller.clear();
+                        onChanged('');
+                      },
+                    ),
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            border: const OutlineInputBorder(borderRadius: AppRadius.brSm),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// عمود نصي جاهز للقراءة فقط.
+TrinaColumn appGridTextColumn(
+  String title,
+  String field, {
+  double width = 140,
+  bool flexible = false,
+  bool hide = false,
+  TrinaColumnTextAlign textAlign = TrinaColumnTextAlign.right,
+  Widget Function(TrinaColumnRendererContext ctx)? renderer,
+}) {
+  return TrinaColumn(
+    title: title,
+    field: field,
+    type: TrinaColumnType.text(),
+    textAlign: textAlign,
+    enableEditingMode: false,
+    width: width,
+    minWidth: flexible ? width : 60,
+    hide: hide,
+    renderer: renderer,
+  );
+}
+
+/// عمود أرقام/مبالغ جاهز للقراءة فقط.
+///
+/// `locale: 'en'` + إلغاء التنسيق على التهيئة: تنسيق intl العربي يسبق إشارة
+/// السالب بمحرف LRM فيفسد إعادة التحليل ويحوّل السوالب أصفاراً (نفس علاج وكيد).
+TrinaColumn appGridNumberColumn(
+  String title,
+  String field, {
+  double width = 110,
+  String format = '#,##0.##',
+  bool hide = false,
+  // صفر = خلية فارغة (في كل التقارير والجداول) ما لم يُمرَّر renderer خاص.
+  bool zeroAsBlank = true,
+  Widget Function(TrinaColumnRendererContext ctx)? renderer,
+}) {
+  return TrinaColumn(
+    title: title,
+    field: field,
+    type: TrinaColumnType.number(
+      format: format,
+      locale: 'en',
+      applyFormatOnInit: false,
+    ),
+    textAlign: TrinaColumnTextAlign.center,
+    enableEditingMode: false,
+    width: width,
+    hide: hide,
+    renderer: renderer ?? (zeroAsBlank ? _zeroAsBlankNumberRenderer : null),
+  );
+}
+
+/// عرض افتراضي لأعمدة الأرقام: خلية فارغة عند الصفر/الفراغ، وإلا رقم LTR
+/// (حتى لا تظهر إشارة السالب بموضع مضلِّل وسط سياق RTL).
+Widget _zeroAsBlankNumberRenderer(TrinaColumnRendererContext ctx) {
+  final v = ctx.cell.value;
+  final n = v is num ? v.toDouble() : double.tryParse(v?.toString() ?? '');
+  if (n == null || n == 0) return const SizedBox.shrink();
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Text(Formatters.number(n), textAlign: TextAlign.center),
+  );
+}
+
+/// زر «الأعمدة»: يفتح نافذة إظهار/إخفاء أعمدة الشبكة (TrinaGrid المدمجة).
+class AppGridColumnsButton extends StatelessWidget {
+  const AppGridColumnsButton({required this.managerGetter, super.key});
+
+  /// يُرجع مدير الشبكة المحفوظ من [AppGrid.onLoaded] (أو null قبل التهيئة).
+  final TrinaGridStateManager? Function() managerGetter;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: 'إظهار/إخفاء الأعمدة',
+      icon: const Icon(Icons.view_column_outlined),
+      onPressed: () => managerGetter()?.showSetColumnsPopup(context),
+    );
+  }
+}
