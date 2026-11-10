@@ -600,14 +600,14 @@ class _SidebarHeader extends StatelessWidget {
                       borderRadius: AppRadius.brSm,
                     ),
                     child: const Icon(
-                      Icons.local_pharmacy,
+                      Icons.warehouse,
                       color: Colors.white,
                       size: 13,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Text(
-                    'صيدليتي',
+                    'مستودعي',
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: theme.colorScheme.primary,

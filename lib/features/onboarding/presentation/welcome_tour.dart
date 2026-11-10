@@ -126,8 +126,8 @@ class _FeaturesDialog extends StatelessWidget {
     final theme = Theme.of(context);
 
     return _TourDialog(
-      icon: Icons.local_pharmacy_outlined,
-      title: 'أهلاً بك في صيدليتي',
+      icon: Icons.warehouse_outlined,
+      title: 'أهلاً بك في مستودعي',
       subtitle: 'لمحة سريعة عمّا يقدّمه البرنامج — أقل من دقيقة.',
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

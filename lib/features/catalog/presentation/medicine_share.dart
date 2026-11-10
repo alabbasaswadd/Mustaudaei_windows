@@ -20,7 +20,7 @@ Future<void> shareMedicineAsImage(GlobalKey boundaryKey, String name) async {
   final data = await image.toByteData(format: ui.ImageByteFormat.png);
   if (data == null) return;
   final bytes = data.buffer.asUint8List();
-  const text = 'بطاقة دواء — صيدليتي';
+  const text = 'بطاقة دواء — مستودعي';
   if (kIsWeb) {
     await Share.shareXFiles(
       [XFile.fromData(bytes, name: 'medicine.png', mimeType: 'image/png')],

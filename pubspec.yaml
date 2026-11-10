@@ -1,5 +1,5 @@
 name: saydaliati
-description: "صيدليتي — تطبيق إدارة صيدلية (نقطة بيع ومخزون)."
+description: "مستودعي — تطبيق إدارة مستودع الأدوية (نقطة بيع ومخزون)."
 publish_to: 'none'
 version: 1.2.1+16
 

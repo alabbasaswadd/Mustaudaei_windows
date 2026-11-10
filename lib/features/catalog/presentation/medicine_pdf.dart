@@ -62,7 +62,7 @@ Future<Uint8List> buildMedicinePdf(
               pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Text('صيدليتي',
+                  pw.Text('مستودعي',
                       style: pw.TextStyle(font: bold, fontSize: 22, color: PdfColors.white)),
                   pw.Text('بطاقة دواء من الكاتلوغ',
                       style: pw.TextStyle(
@@ -130,7 +130,7 @@ Future<Uint8List> buildMedicinePdf(
             pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                pw.Text('صيدليتي — إدارة صيدلية ذكية',
+                pw.Text('مستودعي — إدارة مستودع أدوية ذكية',
                     style: pw.TextStyle(font: bold, fontSize: 10, color: _brand)),
                 pw.Text('امسح الرمز لزيارة موقعنا: codetechsyria.com/saydaliati',
                     style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),

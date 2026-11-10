@@ -58,7 +58,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         // Default app label; the dev flavor overrides it to "صيدليتي ديف".
-        manifestPlaceholders["appLabel"] = "صيدليتي"
+        manifestPlaceholders["appLabel"] = "مستودعي"
     }
 
     signingConfigs {
@@ -103,7 +103,7 @@ android {
         create("dev") {
             dimension = "env"
             applicationIdSuffix = ".dev"
-            manifestPlaceholders["appLabel"] = "صيدليتي ديف"
+            manifestPlaceholders["appLabel"] = "مستودعي ديف"
             signingConfig = if (hasDevKeystore)
                 signingConfigs.getByName("dev")
             else

@@ -43,7 +43,7 @@ class _CatalogDetailPageState extends ConsumerState<CatalogDetailPage> {
             ListTile(
               leading: const Icon(Icons.picture_as_pdf_outlined),
               title: const Text('مشاركة كملف PDF'),
-              subtitle: const Text('الدواء + البدائل مع هوية صيدليتي ورمز الموقع'),
+              subtitle: const Text('الدواء + البدائل مع هوية مستودعي ورمز الموقع'),
               onTap: () => Navigator.pop(ctx, 'pdf'),
             ),
           ],
@@ -137,7 +137,7 @@ class _CatalogDetailPageState extends ConsumerState<CatalogDetailPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('صيدليتي',
+              Text('مستودعي',
                   style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold, color: theme.colorScheme.primary)),
               Text('بطاقة دواء من الكاتلوغ',

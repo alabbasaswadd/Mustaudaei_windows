@@ -15,13 +15,13 @@
 #ifdef DEV
 ; نسخة ديف: اسم وموقع تثبيت ومعرّف منتج مختلفون كلياً عن نسخة الإنتاج —
 ; تُثبَّت بجانبها لا فوقها، فلا خطر على تثبيت العميل الحقيقي على نفس الجهاز.
-#define MyAppName "صيدليتي (ديف)"
-#define MyAppNameLatin "Saydaliati-Dev"
+#define MyAppName "مستودعي (ديف)"
+#define MyAppNameLatin "Mustaudaei-Dev"
 #define MyAppId "{{B7E2A4F0-9C3D-4E1A-8F5B-2A6D7E8C9B0A}"
 #define MyOutputBaseFilename "Setup-dev"
 #else
-#define MyAppName "صيدليتي"
-#define MyAppNameLatin "Saydaliati"
+#define MyAppName "مستودعي"
+#define MyAppNameLatin "Mustaudaei"
 #define MyAppId "{{A3F1C9E2-5D47-4B8A-9E6C-1F2B3C4D5E6F}"
 #define MyOutputBaseFilename "Setup"
 #endif

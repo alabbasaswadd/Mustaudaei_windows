@@ -4,7 +4,7 @@
 abstract final class AppConstants {
   const AppConstants._();
 
-  static const String appName = 'صيدليتي';
+  static const String appName = 'مستودعي';
 
   /// Default network timeouts, shared by the Dio factory.
   static const Duration connectTimeout = Duration(seconds: 20);

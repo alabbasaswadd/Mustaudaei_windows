@@ -73,7 +73,7 @@ class _Header extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('تعلّم صيدليتي خطوة بخطوة',
+                Text('تعلّم مستودعي خطوة بخطوة',
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,

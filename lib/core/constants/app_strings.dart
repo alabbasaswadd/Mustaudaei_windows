@@ -8,7 +8,7 @@ abstract final class AppStrings {
   const AppStrings._();
 
   // App
-  static const String appName = 'صيدليتي';
+  static const String appName = 'مستودعي';
   static const String homeTitle = 'الرئيسية';
   static const String sectionsTitle = 'التقارير';
   static const String homeGreeting = 'أهلاً بك';
@@ -16,7 +16,7 @@ abstract final class AppStrings {
 
   // Bottom navigation tabs
   static const String tabHome = 'التقارير';
-  static const String tabProducts = 'أدويتي';
+  static const String tabProducts = 'المواد';
   static const String tabSales = 'المبيعات';
   static const String tabMore = 'المزيد';
 
@@ -214,28 +214,28 @@ abstract final class AppStrings {
 
   // Auth
   static const String login = 'تسجيل الدخول';
-  static const String loginWelcome = 'مرحباً حكيم';
+  static const String loginWelcome = 'مرحباً بك';
   static const String signIn = 'دخول';
   static const String email = 'البريد الإلكتروني';
   static const String password = 'كلمة المرور';
-  static const String appTagline = 'نظام إدارة الصيدلية';
+  static const String appTagline = 'نظام إدارة مستودع الأدوية';
   static const String registerTitle = 'إنشاء حساب';
   static const String registerCta = 'إنشاء الحساب';
-  static const String registerWelcome = 'أنشئ حساب صيدليتك';
+  static const String registerWelcome = 'أنشئ حساب مستودعك';
   static const String emailOrPhone = 'البريد الإلكتروني أو رقم الهاتف';
   static const String phoneField = 'رقم الهاتف';
-  static const String pharmacyNameField = 'اسم الصيدلية';
+  static const String pharmacyNameField = 'اسم المستودع';
   static const String userNameOptional = 'اسم المستخدم (اختياري)';
   static const String emailOptional = 'البريد الإلكتروني (اختياري)';
-  static const String registerSubtitle = 'أنشئ حساب صيدليتك في دقيقة';
+  static const String registerSubtitle = 'أنشئ حساب مستودعك في دقيقة';
   static const String currencyCannotChange =
       'تنبيه: لا يمكن تغيير العملة الأساسية بعد إنشاء الحساب.';
   static const String accountTitle = 'الحساب الشخصي';
 
   // صفحات التعريف (intro)
   static const String introStart = 'ابدأ الآن';
-  static const String intro1Title = 'أهلاً بك في صيدليتي';
-  static const String intro1Body = 'نظام متكامل لإدارة صيدليتك بسهولة ومن مكان واحد.';
+  static const String intro1Title = 'أهلاً بك في مستودعي';
+  static const String intro1Body = 'نظام متكامل لإدارة مستودعك بسهولة ومن مكان واحد.';
   static const String intro2Title = 'نقطة بيع سريعة';
   static const String intro2Body = 'بِع بمسح الباركود وأصدر الفواتير في ثوانٍ.';
   static const String intro3Title = 'مخزون وتقارير ذكية';
@@ -272,7 +272,7 @@ abstract final class AppStrings {
 
   // Settings — general section
   static const String generalSettings = 'إعدادات عامة';
-  static const String pharmacyName = 'اسم الصيدلية';
+  static const String pharmacyName = 'اسم المستودع';
   static const String notSet = 'غير محدد';
   static const String changeWarehouse = 'تغيير المستودع';
   static const String changeWarehouseSoon =
@@ -543,8 +543,8 @@ abstract final class AppStrings {
   static const String aboutApp = 'معلومات عنا';
   static const String aboutWhoTitle = 'من نحن';
   static const String aboutBody =
-      '«صيدليتي» تطبيق عربي صُمّم خصيصاً لتسهيل إدارة الصيدلية: بيع أسرع، مخزون '
-      'دقيق، وقرارات أوضح. نطوّره باستمرار بالإنصات لاحتياجات الصيادلة.';
+      '«مستودعي» تطبيق عربي صُمّم خصيصاً لتسهيل إدارة مستودع الأدوية: توزيع أسرع، مخزون '
+      'دقيق، وقرارات أوضح. نطوّره باستمرار بالإنصات لاحتياجات مديري المستودعات.';
   static const String aboutPartnerWith = 'بالشراكة مع';
   static const String aboutPartnerBody =
       'نفخر بشراكتنا مع CodeTech، شركة متخصّصة في تطوير البرمجيات والحلول الرقمية.';
