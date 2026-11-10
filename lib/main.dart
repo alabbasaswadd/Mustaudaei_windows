@@ -10,6 +10,7 @@ import 'package:saydaliati/core/diagnostics/startup_log.dart';
 import 'package:screen_retriever/screen_retriever.dart';
 import 'package:window_manager/window_manager.dart';
 
+
 /// نقطة البدء.
 ///
 /// كل مرحلةٍ تُسجَّل في [StartupLog]: نافذةٌ سوداء على جهاز عميلٍ بعيد لا تقول
