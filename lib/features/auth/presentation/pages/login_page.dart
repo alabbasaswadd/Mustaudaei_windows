@@ -24,6 +24,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _phone = TextEditingController();
   final _password = TextEditingController();
+  final _passwordFocus = FocusNode();
   String _fullPhone = '';
   bool _busy = false;
   bool _obscure = true;
@@ -43,6 +44,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   void dispose() {
     _phone.dispose();
     _password.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
@@ -75,7 +77,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget build(BuildContext context) {
     return AuthScaffold(
       title: AppStrings.loginWelcome,
-      subtitle: 'سجّل دخولك للمتابعة إلى صيدليتك',
+      subtitle: 'سجّل دخولك للمتابعة إلى مستودعك',
       child: Form(
         key: _formKey,
         child: Column(
@@ -106,11 +108,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             PhoneField(
               controller: _phone,
               onChanged: (full) => _fullPhone = full,
+              nextFocusNode: _passwordFocus,
             ),
             const SizedBox(height: AppSpacing.md),
             TextFormField(
               controller: _password,
+              focusNode: _passwordFocus,
               obscureText: _obscure,
+              textInputAction: TextInputAction.done,
               decoration: InputDecoration(
                 labelText: AppStrings.password,
                 prefixIcon: const Icon(Icons.lock_outline),

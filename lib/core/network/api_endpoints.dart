@@ -198,4 +198,7 @@ abstract final class ApiEndpoints {
   // action catalogue and the defaults) ----
   static const String shortcuts = '$_base/Shortcut';
   static const String shortcutsReset = '$_base/Shortcut/reset';
+
+  // ---- Damaged goods write-off ----
+  static const String damagedGoods = '$_base/DamagedGoods';
 }

@@ -30,6 +30,16 @@ class VoucherRepositoryImpl implements VoucherRepository {
   }
 
   @override
+  Future<Result<bool>> update(UpdateVoucherInput input) async {
+    try {
+      await remote.update(input.id, input.toJson());
+      return const Result.success(true);
+    } catch (error) {
+      return Result.failure(mapExceptionToFailure(error));
+    }
+  }
+
+  @override
   Future<Result<bool>> delete(String id) async {
     try {
       await remote.delete(id);
@@ -65,6 +75,8 @@ class VoucherRepositoryImpl implements VoucherRepository {
       debit: ((j['debit'] ?? 0) as num).toDouble(),
       credit: ((j['credit'] ?? 0) as num).toDouble(),
       notes: j['notes'] as String?,
+      originalDebit: ((j['originalDebit'] ?? 0) as num).toDouble(),
+      originalCredit: ((j['originalCredit'] ?? 0) as num).toDouble(),
     );
   }
 }

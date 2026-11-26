@@ -16,7 +16,9 @@ import 'package:saydaliati/features/catalog/presentation/pages/catalog_page.dart
 import 'package:saydaliati/features/categories/presentation/pages/categories_page.dart';
 import 'package:saydaliati/features/currencies/presentation/pages/currencies_page.dart';
 import 'package:saydaliati/features/customers/presentation/pages/customers_page.dart';
+import 'package:saydaliati/features/damaged_goods/presentation/pages/damaged_goods_page.dart';
 import 'package:saydaliati/features/debts/presentation/pages/debts_page.dart';
+import 'package:saydaliati/features/home/presentation/pages/analytics_page.dart';
 import 'package:saydaliati/features/expenses/presentation/pages/expense_categories_page.dart';
 import 'package:saydaliati/features/expenses/presentation/pages/expenses_list_page.dart';
 import 'package:saydaliati/features/home/presentation/pages/home_page.dart';
@@ -31,6 +33,8 @@ import 'package:saydaliati/features/purchases/presentation/pages/purchase_create
 import 'package:saydaliati/features/purchases/presentation/pages/purchase_returns_list_page.dart';
 import 'package:saydaliati/features/purchases/presentation/pages/purchases_list_page.dart';
 import 'package:saydaliati/features/reports/domain/report_period.dart';
+import 'package:saydaliati/features/reports/presentation/pages/account_report_page.dart';
+import 'package:saydaliati/features/reports/presentation/pages/balance_sheet_report_page.dart';
 import 'package:saydaliati/features/reports/presentation/pages/expiry_report_page.dart';
 import 'package:saydaliati/features/reports/presentation/pages/inventory_report_page.dart';
 import 'package:saydaliati/features/reports/presentation/pages/prescriptions_report_page.dart';
@@ -38,7 +42,7 @@ import 'package:saydaliati/features/reports/presentation/pages/profit_report_pag
 import 'package:saydaliati/features/reports/presentation/pages/purchases_report_page.dart';
 import 'package:saydaliati/features/reports/presentation/pages/sales_report_page.dart';
 import 'package:saydaliati/features/reports/presentation/pages/stocktake_report_page.dart';
-import 'package:saydaliati/features/roles/presentation/pages/roles_page.dart';
+import 'package:saydaliati/features/roles/presentation/pages/users_permissions_page.dart';
 import 'package:saydaliati/features/sales/presentation/pages/sale_returns_list_page.dart';
 import 'package:saydaliati/features/sales/presentation/pages/sales_list_page.dart';
 import 'package:saydaliati/features/sales/presentation/pages/sales_page.dart';
@@ -49,7 +53,6 @@ import 'package:saydaliati/features/stock/presentation/pages/stock_page.dart';
 import 'package:saydaliati/features/stock_movements/presentation/pages/stock_movements_page.dart';
 import 'package:saydaliati/features/suppliers/presentation/pages/suppliers_page.dart';
 import 'package:saydaliati/features/tutorials/presentation/tutorials_page.dart';
-import 'package:saydaliati/features/users/presentation/pages/users_page.dart';
 import 'package:saydaliati/features/vouchers/presentation/pages/vouchers_list_page.dart';
 
 part 'app_router.g.dart';
@@ -93,6 +96,8 @@ const _routePermissions = <String, String>{
 ///  20  /more/profile          – Account / profile
 ///  25  /more/users            – Staff users (Admin only)
 ///  26  /more/roles            – Roles & permissions (Admin only)
+///  28  /more/damaged-goods    – Damaged goods write-off
+///  29  /more/analytics        – Analytics / charts
 @Riverpod(keepAlive: true)
 GoRouter goRouter(Ref ref) {
   GoRoute rootRoute(String path, Widget Function(GoRouterState) build) =>
@@ -234,6 +239,14 @@ GoRouter goRouter(Ref ref) {
                 path: AppRoutes.prescriptionsReport,
                 builder: (c, s) => const PrescriptionsReportPage(),
               ),
+              GoRoute(
+                path: AppRoutes.accountReport,
+                builder: (c, s) => const AccountReportPage(),
+              ),
+              GoRoute(
+                path: AppRoutes.balanceSheetReport,
+                builder: (c, s) => const BalanceSheetReportPage(),
+              ),
             ],
           ),
 
@@ -296,12 +309,19 @@ GoRouter goRouter(Ref ref) {
           ),
           // ── Staff management (indices 25-26) ──────────────────────────
           // تُضاف في النهاية عمداً (نفس سبب shortcuts/salesInvoices أعلاه).
-          branch(AppRoutes.users, const UsersPage()),
-          branch(AppRoutes.roles, const RolesPage()),
+          // كلا المسارين يُعرضان صفحة موحَّدة بتبويبَيها (المستخدمون + الأدوار).
+          branch(AppRoutes.users, const UsersAndPermissionsPage()),
+          branch(AppRoutes.roles, const UsersAndPermissionsPage()),
           // ── Opening balance invoices (index 27) ─────────────────────────
           // تُضاف في النهاية عمداً (نفس سبب shortcuts/salesInvoices أعلاه).
           branch(AppRoutes.openingBalanceInvoices,
               const OpeningBalanceInvoicesPage()),
+          // ── Damaged goods write-off (index 28) ──────────────────────────
+          // تُضاف في النهاية عمداً (نفس سبب shortcuts/salesInvoices أعلاه).
+          branch(AppRoutes.damagedGoods, const DamagedGoodsPage()),
+          // ── Analytics / charts (index 29) ───────────────────────────────
+          // تُضاف في النهاية عمداً (نفس السبب أعلاه).
+          branch(AppRoutes.analytics, const AnalyticsPage()),
         ],
       ),
     ],

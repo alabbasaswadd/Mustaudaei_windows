@@ -26,6 +26,8 @@ const List<NavEntry> navCatalog = [
   NavEntry(AppRoutes.purchases, 'المشتريات', Icons.shopping_cart_outlined),
   NavEntry(AppRoutes.purchaseInvoices, 'فواتير المشتريات', Icons.receipt_outlined),
   NavEntry(AppRoutes.openingBalanceInvoices, 'أول المدة', Icons.account_balance_wallet_outlined),
+  NavEntry(AppRoutes.damagedGoods, 'بضاعة تالفة', Icons.broken_image_outlined),
+  NavEntry(AppRoutes.analytics, 'التحليلات', Icons.analytics_outlined),
   NavEntry(AppRoutes.salesReturns, 'مرتجع مبيعات', Icons.assignment_return_outlined),
   NavEntry(AppRoutes.purchaseReturns, 'مرتجع مشتريات', Icons.assignment_return_outlined),
   NavEntry(AppRoutes.products, 'الأدوية', Icons.medication_outlined),
@@ -37,7 +39,7 @@ const List<NavEntry> navCatalog = [
   NavEntry(AppRoutes.manufacturers, 'الشركات', Icons.factory_outlined),
   NavEntry(AppRoutes.units, 'الوحدات', Icons.straighten_outlined),
   NavEntry(AppRoutes.currencies, 'العملات', Icons.currency_exchange_outlined),
-  NavEntry(AppRoutes.accounts, 'الحسابات', Icons.account_balance_outlined),
+  NavEntry(AppRoutes.accounts, 'دليل الحسابات', Icons.account_balance_outlined),
   NavEntry(AppRoutes.vouchers, 'السندات', Icons.description_outlined),
   NavEntry(AppRoutes.expenses, 'المصاريف', Icons.payments_outlined),
   NavEntry(AppRoutes.expenseCategories, 'تصنيفات المصاريف', Icons.category_outlined),
@@ -45,7 +47,9 @@ const List<NavEntry> navCatalog = [
   NavEntry(AppRoutes.debtsSuppliers, 'ديون الموردين', Icons.local_shipping_outlined),
   NavEntry(AppRoutes.reports, 'التقارير', Icons.bar_chart_outlined),
   NavEntry(AppRoutes.salesReport, 'تقرير المبيعات', Icons.show_chart_outlined),
-  NavEntry(AppRoutes.profitReport, 'تقرير الأرباح', Icons.trending_up_outlined),
+  NavEntry(AppRoutes.profitReport, 'تقرير الأرباح والخسائر', Icons.trending_up_outlined),
+  NavEntry(AppRoutes.accountReport, 'كشف حساب', Icons.account_balance_wallet_outlined),
+  NavEntry(AppRoutes.balanceSheetReport, 'الميزانية العمومية', Icons.account_balance_outlined),
   NavEntry(AppRoutes.purchasesReport, 'تقرير المشتريات', Icons.shopping_bag_outlined),
   NavEntry(AppRoutes.inventoryReport, 'تقرير المخزون', Icons.inventory_outlined),
   NavEntry(AppRoutes.expiryReport, 'تقرير الصلاحية', Icons.event_busy_outlined),
@@ -56,8 +60,7 @@ const List<NavEntry> navCatalog = [
   NavEntry(AppRoutes.profile, 'الحساب الشخصي', Icons.person_outline),
   NavEntry(AppRoutes.tutorials, 'الشروحات', Icons.school_outlined),
   NavEntry(AppRoutes.notifications, 'الإشعارات', Icons.notifications_outlined),
-  NavEntry(AppRoutes.users, 'المستخدمون', Icons.manage_accounts_outlined),
-  NavEntry(AppRoutes.roles, 'الأدوار والصلاحيات', Icons.admin_panel_settings_outlined),
+  NavEntry(AppRoutes.roles, 'المستخدمون والصلاحيات', Icons.admin_panel_settings_outlined),
 ];
 
 /// أفضل مطابقة لمسار: المطابقة التامّة أولاً، ثم أطول بادئة — فمسار فرعي

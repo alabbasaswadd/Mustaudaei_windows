@@ -7,16 +7,25 @@ class VoucherLine {
     required this.credit,
     this.accountCurrencyCode,
     this.notes,
+    this.originalDebit = 0,
+    this.originalCredit = 0,
   });
 
   final String accountId;
   final String accountName;
+
+  /// المبلغ بالعملة الأساسية (بعد تحويل الخادم).
   final double debit;
   final double credit;
 
   /// عملة الحساب (مثل USD) — null إن لم تكن له عملة خاصة.
   final String? accountCurrencyCode;
   final String? notes;
+
+  /// المبلغ الأصلي بعملة المعاملة قبل تحويل الخادم للعملة الأساسية.
+  /// يُرجعه الخادم الحديث (amountsInOriginalCurrency)؛ صفر إن لم يُرسله.
+  final double originalDebit;
+  final double originalCredit;
 }
 
 /// سند (قيد محاسبي) — يدوي أو تابع لفاتورة/مصروف/مرتجع. السندات التابعة
@@ -62,6 +71,64 @@ class Voucher {
   String? get currencyCode =>
       lines.where((l) => l.debit > 0).map((l) => l.accountCurrencyCode).firstOrNull ??
       lines.where((l) => l.credit > 0).map((l) => l.accountCurrencyCode).firstOrNull;
+
+  /// المبلغ الأصلي بعملة السند قبل تحويله للأساس.
+  /// يُرجعه الخادم الحديث فقط؛ صفر يعني غير متوفر (نستخدم totalDebit بدلاً منه).
+  /// يتحقق أولاً من أسطر المدين؛ فإن كانت صفراً (حساب بالعملة الأساسية) جرّب
+  /// أسطر الدائن — نمط شائع: أجار بالسوري → صندوق دولار (OriginalCredit=50).
+  double get originalTotal {
+    final fromDebit = lines
+        .where((l) => l.debit > 0)
+        .fold<double>(0, (s, l) => s + l.originalDebit);
+    if (fromDebit > 0) return fromDebit;
+    return lines
+        .where((l) => l.credit > 0)
+        .fold<double>(0, (s, l) => s + l.originalCredit);
+  }
+}
+
+/// حمولة تعديل سند مباشر مبسَّط: طرف مدين واحد + طرف دائن واحد بنفس المبلغ.
+class UpdateVoucherInput {
+  const UpdateVoucherInput({
+    required this.id,
+    required this.date,
+    required this.description,
+    required this.debitAccountId,
+    required this.creditAccountId,
+    required this.amount,
+    this.currencyId,
+  });
+
+  final String id;
+  final DateTime date;
+  final String description;
+  final String debitAccountId;
+  final String creditAccountId;
+  final double amount;
+  final String? currencyId;
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'date': date.toIso8601String(),
+        'description': description,
+        'totalDepit': amount,
+        'totalCredit': amount,
+        'currencyId': currencyId,
+        'journalEntryDetails': [
+          {
+            'accountId': debitAccountId,
+            'debit': amount,
+            'credit': 0,
+            'notes': description,
+          },
+          {
+            'accountId': creditAccountId,
+            'debit': 0,
+            'credit': amount,
+            'notes': description,
+          },
+        ],
+      };
 }
 
 /// حمولة إنشاء سند مباشر مبسَّط: طرف مدين واحد + طرف دائن واحد بنفس المبلغ

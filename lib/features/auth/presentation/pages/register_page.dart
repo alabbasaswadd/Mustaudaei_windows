@@ -102,7 +102,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   Widget build(BuildContext context) {
     return AuthScaffold(
       title: AppStrings.registerSubtitle,
-      subtitle: 'املأ البيانات التالية لإنشاء حساب صيدليتك',
+      subtitle: 'املأ البيانات التالية لإنشاء حساب مستودعك',
       child: Form(
         key: _formKey,
         child: Column(

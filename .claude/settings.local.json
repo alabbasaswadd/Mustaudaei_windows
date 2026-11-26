@@ -32,7 +32,27 @@
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(Get-ChildItem -Path \"E:\\\\flutter\\\\Mustaudaei_windows\" -Force)",
       "Bash(Select-Object Name, FullName)",
-      "Bash(xargs grep -l \"appLabel\\\\|appName\")"
+      "Bash(xargs grep -l \"appLabel\\\\|appName\")",
+      "Bash(mkdir -p /e/flutter/Mustaudaei_windows/lib/features/damaged_goods/data/datasources)",
+      "Bash(mkdir -p /e/flutter/Mustaudaei_windows/lib/features/damaged_goods/data/repositories)",
+      "Bash(mkdir -p /e/flutter/Mustaudaei_windows/lib/features/damaged_goods/domain/entities)",
+      "Bash(mkdir -p /e/flutter/Mustaudaei_windows/lib/features/damaged_goods/domain/repositories)",
+      "Bash(mkdir -p /e/flutter/Mustaudaei_windows/lib/features/damaged_goods/presentation/pages)",
+      "Bash(cp /e/flutter/saydaliati-windows/lib/features/damaged_goods/damaged_goods_providers.dart /e/flutter/Mustaudaei_windows/lib/features/damaged_goods/damaged_goods_providers.dart)",
+      "Bash(cp /e/flutter/saydaliati-windows/lib/features/damaged_goods/damaged_goods_providers.g.dart /e/flutter/Mustaudaei_windows/lib/features/damaged_goods/damaged_goods_providers.g.dart)",
+      "Bash(cp /e/flutter/saydaliati-windows/lib/features/damaged_goods/data/datasources/damaged_goods_remote_data_source.dart /e/flutter/Mustaudaei_windows/lib/features/damaged_goods/data/datasources/damaged_goods_remote_data_source.dart)",
+      "Bash(cp /e/flutter/saydaliati-windows/lib/features/damaged_goods/data/repositories/damaged_goods_repository_impl.dart /e/flutter/Mustaudaei_windows/lib/features/damaged_goods/data/repositories/damaged_goods_repository_impl.dart)",
+      "Bash(cp /e/flutter/saydaliati-windows/lib/features/damaged_goods/domain/entities/create_damaged_goods_input.dart /e/flutter/Mustaudaei_windows/lib/features/damaged_goods/domain/entities/create_damaged_goods_input.dart)",
+      "Bash(mkdir -p /e/flutter/Mustaudaei_windows/lib/core/refresh)",
+      "Bash(cp /e/flutter/saydaliati-windows/lib/core/refresh/auto_refresh_service.dart /e/flutter/Mustaudaei_windows/lib/core/refresh/auto_refresh_service.dart)",
+      "Bash(cp /e/flutter/saydaliati-windows/lib/core/refresh/auto_refresh_service.g.dart /e/flutter/Mustaudaei_windows/lib/core/refresh/auto_refresh_service.g.dart)",
+      "Bash(cp /e/flutter/saydaliati-windows/lib/features/home/presentation/pages/analytics_page.dart /e/flutter/Mustaudaei_windows/lib/features/home/presentation/pages/analytics_page.dart)",
+      "Bash(cp /e/flutter/saydaliati-windows/lib/features/reports/presentation/pages/account_report_page.dart /e/flutter/Mustaudaei_windows/lib/features/reports/presentation/pages/account_report_page.dart)",
+      "Bash(cp /e/flutter/saydaliati-windows/lib/features/reports/presentation/pages/balance_sheet_report_page.dart /e/flutter/Mustaudaei_windows/lib/features/reports/presentation/pages/balance_sheet_report_page.dart)",
+      "Bash(cp /e/flutter/saydaliati-windows/lib/features/roles/presentation/pages/users_permissions_page.dart /e/flutter/Mustaudaei_windows/lib/features/roles/presentation/pages/users_permissions_page.dart)",
+      "Bash(grep -v \"//.*صيدليتي\\\\|: //\")",
+      "Bash(grep -v \"^\\\\s*//\")",
+      "Bash(grep -v \"\\\\.dart:.*//.*صيد\")"
     ]
   }
 }

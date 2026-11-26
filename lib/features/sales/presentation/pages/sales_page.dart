@@ -33,6 +33,7 @@ import 'package:saydaliati/features/sales/presentation/pages/pending_invoices_pa
 import 'package:saydaliati/features/sales/presentation/providers/sales_provider.dart';
 import 'package:saydaliati/features/sales/sale_providers.dart';
 import 'package:saydaliati/features/settings/settings_providers.dart';
+import 'package:saydaliati/features/suppliers/supplier_providers.dart';
 import 'package:saydaliati/features/shortcuts/domain/shortcut_action.dart';
 import 'package:saydaliati/features/shortcuts/presentation/shortcuts_scope.dart';
 import 'package:saydaliati/features/shortcuts/presentation/widgets/shortcut_hints_bar.dart';
@@ -59,12 +60,13 @@ class _PosLine {
   MedicineUnit unit; // selected unit (holds the base-currency salePrice)
   double unitPrice; // in the selected currency
   double quantity = 1;
+  double discount = 0; // per-line discount in the selected currency
 
   // Available expiry batches + the chosen one (default: nearest expiry).
   List<MedicineBatch> batches = const [];
   MedicineBatch? selectedBatch;
 
-  double get total => unitPrice * quantity;
+  double get total => unitPrice * quantity - discount;
 }
 
 /// Tab 3 — المبيعات (نقطة البيع). عند الاستخدام الرئيسي (بلا معاملات) يفتح
@@ -167,6 +169,8 @@ class _SingleSaleScaffoldState extends ConsumerState<_SingleSaleScaffold> {
   bool _isPrescription = false;
   bool _submitting = false;
   bool _prefilled = false;
+  double _discountAmount = 0;
+  late final _discountAmountCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -188,6 +192,7 @@ class _SingleSaleScaffoldState extends ConsumerState<_SingleSaleScaffold> {
   void dispose() {
     _grid?.removeListener(_onGridSelectionChanged);
     _shortcuts.dispose();
+    _discountAmountCtrl.dispose();
     super.dispose();
   }
 
@@ -365,7 +370,16 @@ class _SingleSaleScaffoldState extends ConsumerState<_SingleSaleScaffold> {
 
   Future<void> _pickCustomerByShortcut() async {
     final customers = ref.read(customersProvider).value ?? const <Customer>[];
-    final picked = await showCustomerPicker(context, customers);
+    final supplierList = ref.read(suppliersProvider).value ?? const [];
+    final supplierAsCustomers = supplierList.map((s) => Customer(
+      id: s.id,
+      firstName: s.name,
+      lastName: '',
+      phone: s.contactPerson,
+      address: '',
+    )).toList();
+    final allParties = [...customers, ...supplierAsCustomers];
+    final picked = await showCustomerPicker(context, allParties);
     if (picked == null || !mounted) return;
     setState(() => _customerId = picked.id);
   }
@@ -373,7 +387,8 @@ class _SingleSaleScaffoldState extends ConsumerState<_SingleSaleScaffold> {
   bool get _isEdit => widget.saleToEdit != null;
   bool get _isQueuedEdit => widget.queuedId != null;
 
-  double get _total => _lines.fold(0, (s, l) => s + l.total);
+  double get _subTotal => _lines.fold(0, (s, l) => s + l.total);
+  double get _total => _subTotal - _discountAmount;
 
   String _effectiveCurrencyId(Currency? base) => _currencyId ?? base?.id ?? '';
 
@@ -1114,17 +1129,28 @@ class _SingleSaleScaffoldState extends ConsumerState<_SingleSaleScaffold> {
                         ),
                         SizedBox(
                           width: 220,
-                          child: CustomerPickerField(
-                            compact: true,
-                            label: AppStrings.customer,
-                            hint: AppStrings.noCustomer,
-                            customers: ref.watch(customersProvider).value ??
-                                const <Customer>[],
-                            selectedId: _customerId,
-                            allowClear: true,
-                            onCleared: () => setState(() => _customerId = null),
-                            onSelected: (c) => setState(() => _customerId = c.id),
-                          ),
+                          child: Builder(builder: (_) {
+                            final customers = ref.watch(customersProvider).value ?? const <Customer>[];
+                            final supplierList = ref.watch(suppliersProvider).value ?? const [];
+                            final supplierAsCustomers = supplierList.map((s) => Customer(
+                              id: s.id,
+                              firstName: s.name,
+                              lastName: '',
+                              phone: s.contactPerson,
+                              address: '',
+                            )).toList();
+                            final allParties = [...customers, ...supplierAsCustomers];
+                            return CustomerPickerField(
+                              compact: true,
+                              label: AppStrings.customer,
+                              hint: AppStrings.noCustomer,
+                              customers: allParties,
+                              selectedId: _customerId,
+                              allowClear: true,
+                              onCleared: () => setState(() => _customerId = null),
+                              onSelected: (c) => setState(() => _customerId = c.id),
+                            );
+                          }),
                         ),
                         _paymentMethodField(),
                         if (_payMethod != PaymentMethod.credit)
@@ -1210,6 +1236,7 @@ class _SingleSaleScaffoldState extends ConsumerState<_SingleSaleScaffold> {
   static const _fUnit = 'unit';
   static const _fPrice = 'price';
   static const _fQty = 'qty';
+  static const _fDiscount = 'discount';
   static const _fBatch = 'batch';
   static const _fTotal = 'total';
   static const _fDel = 'del';
@@ -1228,6 +1255,7 @@ class _SingleSaleScaffoldState extends ConsumerState<_SingleSaleScaffold> {
           l.unit.unitId,
           l.unitPrice,
           l.quantity,
+          l.discount,
           l.selectedBatch?.stockId,
           l.batches.length,
         ],
@@ -1332,6 +1360,16 @@ class _SingleSaleScaffoldState extends ConsumerState<_SingleSaleScaffold> {
           enableEditingMode: true,
           checkReadOnly: (row, cell) => isNewRow(row),
         ),
+        TrinaColumn(
+          title: 'خصم السطر',
+          field: _fDiscount,
+          type: TrinaColumnType.number(
+              format: '#,##0.##', locale: 'en', applyFormatOnInit: false),
+          width: 100,
+          textAlign: TrinaColumnTextAlign.center,
+          enableEditingMode: true,
+          checkReadOnly: (row, cell) => isNewRow(row),
+        ),
         // دفعة الصلاحية: قائمة داخل الخلية.
         TrinaColumn(
           title: AppStrings.expiryDateLabel,
@@ -1419,6 +1457,7 @@ class _SingleSaleScaffoldState extends ConsumerState<_SingleSaleScaffold> {
             _fUnit: TrinaCell(value: l.unit.unitName),
             _fPrice: TrinaCell(value: l.unitPrice),
             _fQty: TrinaCell(value: l.quantity),
+            _fDiscount: TrinaCell(value: l.discount),
             _fBatch: TrinaCell(
                 value: l.selectedBatch != null
                     ? l.selectedBatch!.expiryLabel
@@ -1433,6 +1472,7 @@ class _SingleSaleScaffoldState extends ConsumerState<_SingleSaleScaffold> {
           _fUnit: TrinaCell(value: ''),
           _fPrice: TrinaCell(value: ''),
           _fQty: TrinaCell(value: ''),
+          _fDiscount: TrinaCell(value: ''),
           _fBatch: TrinaCell(value: ''),
           _fTotal: TrinaCell(value: ''),
           _fDel: TrinaCell(value: ''),
@@ -1453,6 +1493,8 @@ class _SingleSaleScaffoldState extends ConsumerState<_SingleSaleScaffold> {
             l.unitPrice = v;
           } else if (e.column.field == _fQty && v != null && v > 0) {
             l.quantity = v;
+          } else if (e.column.field == _fDiscount && v != null && v >= 0) {
+            l.discount = v;
           }
           // قيمة غير صالحة → البصمة تعيد البناء بالقيمة القديمة.
         });
@@ -2079,7 +2121,7 @@ class _AddStockDialogState extends State<_AddStockDialog> {
                               fontWeight: FontWeight.bold,
                               color: Colors.orange.shade900)),
                       Text(
-                        'المتوفّر حالياً في صيدليتك: ${Formatters.qty(widget.available)} ${widget.unitName}',
+                        'المتوفّر حالياً في مستودعك: ${Formatters.qty(widget.available)} ${widget.unitName}',
                         style: theme.textTheme.labelSmall
                             ?.copyWith(color: theme.hintColor),
                       ),

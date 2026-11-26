@@ -38,6 +38,7 @@ part of 'app_router.dart';
 ///  20  /more/profile          – Account / profile
 ///  25  /more/users            – Staff users (Admin only)
 ///  26  /more/roles            – Roles & permissions (Admin only)
+///  28  /more/damaged-goods    – Damaged goods write-off
 
 @ProviderFor(goRouter)
 final goRouterProvider = GoRouterProvider._();
@@ -139,4 +140,4 @@ final class GoRouterProvider
   }
 }
 
-String _$goRouterHash() => r'ade671568891211ab88a367ac6dfcae9e30e20c3';
+String _$goRouterHash() => r'eb34ac5e72b09efcee40f8d3b62f0b2c58aba29d';

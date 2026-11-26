@@ -78,6 +78,9 @@ class _AccountFormDialogState extends ConsumerState<_AccountFormDialog> {
     final parent = widget.accounts.where((a) => a.id == parentId).firstOrNull;
     if (parent == null) return;
 
+    // ضبط نوع الحساب تلقائياً من نوع الأب (نُعيّن مباشرة — المُستدعي داخل setState)
+    _accountType = parent.accountType;
+
     final siblingCodes = widget.accounts
         .where((a) => a.parentId == parentId)
         .map((a) => int.tryParse(a.code))
@@ -191,7 +194,8 @@ class _AccountFormDialogState extends ConsumerState<_AccountFormDialog> {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   AppDropdown<String?>(
-                    label: 'الحساب الأب (اختياري)',
+                    label: 'الحساب الأب',
+                    isRequired: true,
                     enabled: !_saving,
                     value: _parentId,
                     items: [
@@ -203,6 +207,7 @@ class _AccountFormDialogState extends ConsumerState<_AccountFormDialog> {
                       _parentId = v;
                       _suggestCodeForParent(v);
                     }),
+                    validator: (v) => (v == null) ? AppStrings.requiredField : null,
                   ),
                   const SizedBox(height: AppSpacing.md),
                   AppTextField(
@@ -232,7 +237,8 @@ class _AccountFormDialogState extends ConsumerState<_AccountFormDialog> {
                     final currencies =
                         ref.watch(currenciesProvider).value ?? const [];
                     return AppDropdown<String?>(
-                      label: 'عملة الحساب (اختياري)',
+                      label: 'عملة الحساب',
+                      isRequired: true,
                       enabled: !_saving,
                       value: _currencyId,
                       items: [
@@ -241,6 +247,7 @@ class _AccountFormDialogState extends ConsumerState<_AccountFormDialog> {
                           AppDropdownItem(value: c.id, label: '${c.code} — ${c.name}'),
                       ],
                       onChanged: (v) => setState(() => _currencyId = v),
+                      validator: (v) => (v == null) ? AppStrings.requiredField : null,
                     );
                   }),
                   const SizedBox(height: AppSpacing.lg),

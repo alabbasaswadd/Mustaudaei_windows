@@ -40,6 +40,9 @@ abstract final class AppRoutes {
   // فواتير أول المدة — مخزون افتتاحي بلا مورّد، مقيَّد مقابل رأس المال.
   static const String openingBalanceInvoices = '/more/invoices/opening-balance';
 
+  // بضاعة تالفة — إخراج مخزون تالف/منتهي الصلاحية (DamagedGoods).
+  static const String damagedGoods = '/more/damaged-goods';
+
   static const String salesReturns = '/more/returns/sales';
   static const String purchaseReturns = '/more/returns/purchases';
 
@@ -82,4 +85,10 @@ abstract final class AppRoutes {
   // PermissionCodes.usersView / rolesView in the router redirect + sidebar).
   static const String users = '/more/users';
   static const String roles = '/more/roles';
+
+  // التحليلات — مخططات بيانية مفصّلة (نُقلت من الرئيسية).
+  static const String analytics = '/more/analytics';
+
+  static const String accountReport = '/more/reports/account';
+  static const String balanceSheetReport = '/more/reports/balance-sheet';
 }

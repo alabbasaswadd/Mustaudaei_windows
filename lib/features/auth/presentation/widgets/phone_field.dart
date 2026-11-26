@@ -21,12 +21,16 @@ class PhoneField extends StatefulWidget {
     required this.controller,
     required this.onChanged,
     this.required = true,
+    this.nextFocusNode,
     super.key,
   });
 
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
   final bool required;
+
+  /// When set, pressing the keyboard's "next" action moves focus here.
+  final FocusNode? nextFocusNode;
 
   @override
   State<PhoneField> createState() => _PhoneFieldState();
@@ -51,29 +55,31 @@ class _PhoneFieldState extends State<PhoneField> {
     return Row(
       textDirection: TextDirection.ltr, // keep [code][number] order tidy
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          decoration: BoxDecoration(
-            border: Border.all(color: theme.dividerColor),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _dial,
+        ExcludeFocus(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            decoration: BoxDecoration(
+              border: Border.all(color: theme.dividerColor),
               borderRadius: BorderRadius.circular(12),
-              items: [
-                for (final c in kDialCodes)
-                  DropdownMenuItem(
-                    value: c.$1,
-                    child: Text('${c.$1}  ${c.$2}',
-                        style: theme.textTheme.bodyMedium),
-                  ),
-              ],
-              onChanged: (v) {
-                if (v == null) return;
-                setState(() => _dial = v);
-                _emit();
-              },
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _dial,
+                borderRadius: BorderRadius.circular(12),
+                items: [
+                  for (final c in kDialCodes)
+                    DropdownMenuItem(
+                      value: c.$1,
+                      child: Text('${c.$1}  ${c.$2}',
+                          style: theme.textTheme.bodyMedium),
+                    ),
+                ],
+                onChanged: (v) {
+                  if (v == null) return;
+                  setState(() => _dial = v);
+                  _emit();
+                },
+              ),
             ),
           ),
         ),
@@ -84,6 +90,7 @@ class _PhoneFieldState extends State<PhoneField> {
             keyboardType: TextInputType.phone,
             textDirection: TextDirection.ltr,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            textInputAction: TextInputAction.next,
             decoration: const InputDecoration(
               labelText: AppStrings.phoneField,
               prefixIcon: Icon(Icons.phone_outlined),
@@ -94,6 +101,7 @@ class _PhoneFieldState extends State<PhoneField> {
                     : null
                 : null,
             onChanged: (_) => _emit(),
+            onFieldSubmitted: (_) => widget.nextFocusNode?.requestFocus(),
           ),
         ),
       ],

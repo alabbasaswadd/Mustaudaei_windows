@@ -99,8 +99,10 @@ abstract final class AppStrings {
   static const String noBatchesInStock = 'لا توجد دفعات في المخزون';
   static const String stockStatus = 'الحالة';
   static const String costPriceLabel = 'سعر الكلفة';
-  static const String profitReportTitle = 'تقرير الأرباح';
+  static const String profitReportTitle = 'تقرير الأرباح والخسائر';
   static const String todaysProfit = 'أرباح اليوم';
+  static const String expensesShort = 'المصاريف';
+  static const String netProfit = 'صافي الربح';
   static const String revenueShort = 'الإيراد';
   static const String costShort = 'التكلفة';
   static const String profitShort = 'الربح';
@@ -421,7 +423,7 @@ abstract final class AppStrings {
   static const String expenseCategoryColumn = 'التصنيف';
   static const String expenseAmount = 'المبلغ';
   static const String expenseDate = 'التاريخ';
-  static const String expenseNote = 'ملاحظة';
+  static const String expenseNote = 'البيان';
   static const String expensePaymentSource = 'مصدر الدفع';
   static const String selectAccount = 'اختر الحساب';
 
