@@ -703,6 +703,7 @@ class _SingleSaleScaffoldState extends ConsumerState<_SingleSaleScaffold> {
       warehouseId: warehouseId,
       saleDate: _saleDate,
       totalAmount: serverConverts ? _total : toBase(_total),
+      discountAmount: serverConverts ? _discountAmount : toBase(_discountAmount),
       paymentMethod: _payMethod,
       paymentAccountId: _payMethod == PaymentMethod.credit ? null : _paymentAccountId,
       isPrescription: _isPrescription,
@@ -713,6 +714,7 @@ class _SingleSaleScaffoldState extends ConsumerState<_SingleSaleScaffold> {
             unitId: l.unit.unitId,
             individual: serverConverts ? l.unitPrice : toBase(l.unitPrice),
             quantity: l.quantity,
+            discount: serverConverts ? l.discount : toBase(l.discount),
             stockId: l.selectedBatch?.stockId,
           ),
       ],
@@ -919,6 +921,9 @@ class _SingleSaleScaffoldState extends ConsumerState<_SingleSaleScaffold> {
         sale.paymentAccountId.isNotEmpty ? sale.paymentAccountId : null;
     _lastSuggestedPaymentAccountId = null;
     _isPrescription = sale.isPrescription;
+    _discountAmount = sale.discountAmount;
+    _discountAmountCtrl.text =
+        sale.discountAmount > 0 ? sale.discountAmount.toString() : '';
     _lines.clear();
     for (final line in sale.items) {
       final med = catalog.where((m) => m.id == line.medicineId).firstOrNull;
@@ -927,7 +932,8 @@ class _SingleSaleScaffoldState extends ConsumerState<_SingleSaleScaffold> {
           med.units.where((u) => u.unitId == line.unitId).firstOrNull ??
               med.units.first;
       _lines.add(_PosLine(medicine: med, unit: unit, unitPrice: line.individual)
-        ..quantity = line.quantity);
+        ..quantity = line.quantity
+        ..discount = line.discount);
     }
   }
 
@@ -944,6 +950,9 @@ class _SingleSaleScaffoldState extends ConsumerState<_SingleSaleScaffold> {
     _paymentAccountId = (payAccId != null && payAccId.isNotEmpty) ? payAccId : null;
     _lastSuggestedPaymentAccountId = null;
     _isPrescription = payload['isPrescription'] == true;
+    _discountAmount = ((payload['discountAmount'] ?? 0) as num).toDouble();
+    _discountAmountCtrl.text =
+        _discountAmount > 0 ? _discountAmount.toString() : '';
     _lines.clear();
     for (final raw in (payload['items'] as List?) ?? const []) {
       if (raw is! Map) continue;
@@ -957,7 +966,9 @@ class _SingleSaleScaffoldState extends ConsumerState<_SingleSaleScaffold> {
         medicine: med,
         unit: unit,
         unitPrice: ((raw['individual'] ?? 0) as num).toDouble(),
-      )..quantity = ((raw['quantity'] ?? 1) as num).toDouble();
+      )
+        ..quantity = ((raw['quantity'] ?? 1) as num).toDouble()
+        ..discount = ((raw['discount'] ?? 0) as num).toDouble();
       final stockId = (raw['stockId'] ?? '').toString();
       if (stockId.isNotEmpty) {
         // Preserve the pinned batch so the edit re-emits the same stockId.
@@ -1168,6 +1179,17 @@ class _SingleSaleScaffoldState extends ConsumerState<_SingleSaleScaffold> {
                         // وصفة طبية؟ عند التفعيل يصبح اختيار العميل إجبارياً.
                         _prescriptionToggle(theme),
                       ],
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  SizedBox(
+                    width: 130,
+                    child: AppNumberField(
+                      controller: _discountAmountCtrl,
+                      label: 'خصم الفاتورة',
+                      enabled: !_submitting,
+                      onChanged: (v) => setState(
+                          () => _discountAmount = double.tryParse(v) ?? 0),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
